@@ -1,33 +1,27 @@
-import styled from "styled-components";
-import { useEffect, useState } from "react";
-import { RegExp } from "../util/RegExp";
-import fetchSick from "../lib/fetchSick";
-import RecoWord from "./RecoWord";
-
-import type { KeyLIEvent, SickInfo } from "../types";
+import styled from 'styled-components';
+import { SetStateAction, useEffect, useState } from 'react';
+import { RegExp } from '../util/RegExp';
+import { KeyLIEvent } from '../types/index';
+import RecoWord from './RecoWord';
+import fetchSick from '../lib/fetchSick';
+import useDebounce from '../hooks/useDebounce';
+import useSearch from '../hooks/useSearch';
 
 interface childProps {
-  isFocus: boolean;
   searchWord: string;
   setSearchWord: React.Dispatch<React.SetStateAction<string>>;
-  focusHandler: (type: string) => void;
-  localStorageData: string[] | undefined;
-  setlocalStorageData: React.Dispatch<
-    React.SetStateAction<string[] | undefined>
-  >;
-  keyInUse: boolean;
+  onFocus: React.Dispatch<SetStateAction<boolean>>;
 }
 
 export const RecommendSearch = ({
-  isFocus,
   searchWord,
   setSearchWord,
-  focusHandler,
-  localStorageData,
-  setlocalStorageData,
-  keyInUse,
+  onFocus,
 }: childProps) => {
-  const [recommendWord, setRecommendWord] = useState<Array<SickInfo>>([]);
+  const [recommendWord, setRecommendWord] = useState<Array<any>>([]);
+
+  const { keyInUse } = useDebounce();
+  const { localStorageData, setlocalStorageData } = useSearch();
 
   useEffect(() => {
     if (
@@ -49,14 +43,13 @@ export const RecommendSearch = ({
 
   // delete recent list
   const deleteSearchedWord = (value: string) => {
-    let newLocalData = localStorageData?.filter((item) => item !== value);
-    localStorage.setItem("searched", `${newLocalData}`);
+    let newLocalData = localStorageData?.filter((item: any) => item !== value);
+    localStorage.setItem('searched', `${newLocalData}`);
     setlocalStorageData(newLocalData);
   };
 
   // tabIndex logic
   const [focusItem, setFocusItem] = useState<string>('');
-  console.log(focusItem);
 
   const focusListSearch = (e: KeyboardEvent, focusItem: string) => {
     if (e.code === 'Enter') {
@@ -102,93 +95,85 @@ export const RecommendSearch = ({
   };
 
   return (
-    <>
-      {isFocus ? (
-        <Container onClick={(e) => e.stopPropagation()}>
-          {searchWord?.length === 0 ? (
-            <CardBox>
-              <SearchCate>최근 검색어</SearchCate>
-              <RecommendList>
-                {localStorageData?.length ? (
-                  localStorageData.map((item: string, index: number) => {
-                    return (
-                      <li
-                        key={index}
-                        id={`searchList${index}`}
-                        tabIndex={0}
-                        onClick={() => {
-                          setSearchWord(item);
-                          focusHandler('blur');
-                        }}
-                        onKeyDown={(e) =>
-                          focusContralArrow(e, index, localStorageData.length)
-                        }
-                        onFocus={() => setFocusItem(item)}
-                      >
-                        <ListItemWrap>
-                          <img
-                            src={require('../images/searchGray.png')}
-                            alt='돋보기 이미지'
-                          />
-                          <span>{item}</span>
-                        </ListItemWrap>
-                        <CancelBtn
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteSearchedWord(item);
-                          }}
-                          src={require('../images/cancel.png')}
-                          alt='최근 검색어 삭제'
-                        />
-                      </li>
-                    );
-                  })
-                ) : (
-                  <p>최근 검색어가 없습니다.</p>
-                )}
-              </RecommendList>
-            </CardBox>
-          ) : (
-            <CardBox>
-              <SearchCate>추천 검색어</SearchCate>
-              <RecommendList>
-                {recommendWord?.length ? (
-                  recommendWord.map((item, index) => {
-                    return (
-                      <li
-                        key={item.sickCd}
-                        id={`searchList${index}`}
-                        tabIndex={0}
-                        onClick={() => {
-                          setSearchWord(item.sickNm);
-                          focusHandler('blur');
-                        }}
-                        onKeyDown={(e) =>
-                          focusContralArrow(e, index, recommendWord?.length)
-                        }
-                        onFocus={() => setFocusItem(item.sickNm)}
-                      >
-                        <ListItemWrap>
-                          <RecoWord item={item} searchWord={searchWord} />
-                        </ListItemWrap>
-                      </li>
-                    );
-                  })
-                ) : (
-                  <p>추천 검색어가 없습니다.</p>
-                )}
-              </RecommendList>
-            </CardBox>
-          )}
-        </Container>
-      ) : null}
-    </>
+    <Container onClick={(e) => e.stopPropagation()}>
+      {searchWord?.length === 0 ? (
+        <CardBox>
+          <SearchCate>최근 검색어</SearchCate>
+          <RecommendList>
+            {localStorageData && localStorageData !== undefined ? (
+              localStorageData?.map((item: string, index: number) => (
+                <li
+                  key={index}
+                  id={`searchList${index}`}
+                  tabIndex={0}
+                  onClick={() => {
+                    setSearchWord(item);
+                    onFocus(false);
+                  }}
+                  onKeyDown={(e) =>
+                    focusContralArrow(e, index, localStorageData?.length)
+                  }
+                  onFocus={() => setFocusItem(item)}
+                >
+                  <ListItemWrap>
+                    <img
+                      src={require('../images/searchGray.png')}
+                      alt='돋보기 이미지'
+                    />
+                    <span>{item}</span>
+                  </ListItemWrap>
+                  <CancelBtn
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteSearchedWord(item);
+                    }}
+                    src={require('../images/cancel.png')}
+                    alt='최근 검색어 삭제'
+                  />
+                </li>
+              ))
+            ) : (
+              <p>최근 검색어가 없습니다.</p>
+            )}
+          </RecommendList>
+        </CardBox>
+      ) : (
+        <CardBox>
+          <SearchCate>추천 검색어</SearchCate>
+          <RecommendList>
+            {recommendWord?.length !== 0 ? (
+              recommendWord?.map((item, index) => {
+                return (
+                  <li
+                    key={index}
+                    id={`searchList${index}`}
+                    tabIndex={0}
+                    onClick={() => {
+                      setSearchWord(item.sickNm);
+                      onFocus(false);
+                    }}
+                    onKeyDown={(e) =>
+                      focusContralArrow(e, index, recommendWord?.length)
+                    }
+                    onFocus={() => setFocusItem(item.sickNm)}
+                  >
+                    <ListItemWrap>
+                      <RecoWord item={item} searchWord={searchWord} />
+                    </ListItemWrap>
+                  </li>
+                );
+              })
+            ) : (
+              <p>추천 검색어가 없습니다.</p>
+            )}
+          </RecommendList>
+        </CardBox>
+      )}
+    </Container>
   );
 };
 
 const Container = styled.div`
-  position: absolute;
-  top: 350px;
   width: 490px;
   max-height: 500px;
   overflow-y: auto;
