@@ -1,14 +1,31 @@
-import styled from "styled-components";
-import { RecommendSearch } from "./components/RecommendSearch";
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { RecommendSearch } from './components/RecommendSearch';
 import useDebounce from './hooks/useDebounce';
 import useSearch from './hooks/useSearch';
 
+const UP: string = 'up';
+const DOWN: string = 'down';
+
 function App() {
-  const { keyInUse, keyCheck } = useDebounce();
-  const {isFocus, searchWord, localStorageData, setlocalStorageData, setSearchWord, focusHandler, focusOn, onSubmit} = useSearch();
+  const [isFocus, setIsFocus] = useState<boolean>(false);
+  const [searchWord, setSearchWord] = useState<string>('');
+
+  const { keyCheck } = useDebounce();
+  const { setRecentSearch } = useSearch();
+
+  const searchInputFocus = () => {
+    document.getElementById('searchInput')?.focus();
+  };
+
+  const submitHandler = (e: React.FormEvent) => {
+    e.preventDefault();
+    setRecentSearch(searchWord);
+    setSearchWord('');
+  };
 
   return (
-    <SearchBox onClick={() => focusHandler("blur")}>
+    <SearchBox onClick={() => setIsFocus(false)}>
       <h2>
         국내 모든 임상시험 검색하고
         <br />
@@ -16,54 +33,52 @@ function App() {
       </h2>
       <InputWrap onClick={(e) => e.stopPropagation()}>
         <InputBox
-          style={isFocus ? { border: "2px solid #007BE9" } : { border: "none" }}
+          style={isFocus ? { border: '2px solid #007BE9' } : { border: 'none' }}
         >
-          <SearchArea onSubmit={onSubmit}>
+          <SearchArea onSubmit={submitHandler}>
             <SearchInput
               onChange={(e) => setSearchWord(e.target.value)}
-              onFocus={() => focusHandler("focus")}
-              onKeyUp={(e) => keyCheck(e, "up")}
-              onKeyDown={(e) => keyCheck(e, "down")}
-              id="searchInput"
-              type="text"
-              autoComplete="off"
+              onKeyUp={(e) => keyCheck(e, UP)}
+              onKeyDown={(e) => keyCheck(e, DOWN)}
+              onFocus={() => setIsFocus(true)}
+              id='searchInput'
+              type='text'
+              autoComplete='off'
               tabIndex={0}
               value={searchWord}
             />
             <SearchPlaceHolder
-              onClick={focusOn}
+              onClick={searchInputFocus}
               style={
                 isFocus || searchWord.length > 0
-                  ? { display: "none" }
-                  : { display: "flex" }
+                  ? { display: 'none' }
+                  : { display: 'flex' }
               }
             >
               <img
-                src={require("../src/images/searchGray.png")}
-                alt="placeholder"
+                src={require('../src/images/searchGray.png')}
+                alt='placeholder'
               />
               질환명을 입력해주세요
             </SearchPlaceHolder>
             <CancelBtn
-              onClick={() => setSearchWord("")}
-              src={require("../src/images/cancel.png")}
-              alt="검색 초기화"
+              onClick={() => setSearchWord('')}
+              src={require('../src/images/cancel.png')}
+              alt='검색 초기화'
             />
             <SearchBtn tabIndex={-1}>
-              <img src={require("../src/images/searchWhite.png")} alt="검색" />
+              <img src={require('../src/images/searchWhite.png')} alt='검색' />
             </SearchBtn>
           </SearchArea>
         </InputBox>
       </InputWrap>
-      <RecommendSearch
-        isFocus={isFocus}
-        searchWord={searchWord}
-        setSearchWord={setSearchWord}
-        focusHandler={focusHandler}
-        localStorageData={localStorageData}
-        setlocalStorageData={setlocalStorageData}
-        keyInUse={keyInUse}
-      />
+      {!isFocus ? null : (
+        <RecommendSearch
+          searchWord={searchWord}
+          setSearchWord={setSearchWord}
+          onFocus={setIsFocus}
+        />
+      )}
     </SearchBox>
   );
 }
@@ -75,7 +90,7 @@ const SearchBox = styled.div`
   justify-content: center;
   align-items: center;
   width: 100vw;
-  height: 450px;
+  height: 100vh;
   background-color: #cae9ff;
   & h2 {
     font-size: 2.2rem;
