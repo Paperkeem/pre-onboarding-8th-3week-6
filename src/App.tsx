@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { RecommendSearch } from './components/RecommendSearch';
+import RecommendSearch from './components/RecommendSearch';
 import useDebounce from './hooks/useDebounce';
 import useSearch from './hooks/useSearch';
 
@@ -76,12 +76,13 @@ function App() {
         <RecommendSearch
           searchWord={searchWord}
           setSearchWord={setSearchWord}
-          onFocus={setIsFocus}
+          setIsFocus={setIsFocus}
         />
       )}
     </SearchBox>
   );
 }
+
 export default App;
 
 const SearchBox = styled.div`
@@ -90,8 +91,9 @@ const SearchBox = styled.div`
   justify-content: center;
   align-items: center;
   width: 100vw;
-  height: 100vh;
-  background-color: #cae9ff;
+  position: absolute;
+  top: 10vh;
+
   & h2 {
     font-size: 2.2rem;
     text-align: center;
