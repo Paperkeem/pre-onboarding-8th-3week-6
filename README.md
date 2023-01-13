@@ -1,6 +1,21 @@
 # 검색창/검색어 추천 기능 구현 - 원티드 프리온보딩 3주차
 
-## 배포주소 : 
+## 배포주소 : https://pre-onboarding-8th-3week-6.vercel.app/
+
+</br></br>
+
+## 6조
+
+### Team
+
+- 김태훈(팀장)
+- 김민정
+- 김종이
+- 송지현
+- 이상현
+- 이요한
+- 이조은
+- 2023.01.10 - 01.13
 
 </br></br>
 
@@ -23,6 +38,10 @@ yarn install
 ```bash
 # local DB
 yarn json-server --watch db.json --port 4000
+```
+
+```.env
+REACT_APP_BASE_SEARCH_URL="http://localhost:4000/sick?q="
 ```
 
 ```bash
