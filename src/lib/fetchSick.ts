@@ -15,7 +15,7 @@ const fetchSick = async <T>(
     } else {
       const response2 = await fetch(`${BASE_URL}${param}`);
       await cacheStorage.put(`${BASE_URL}${param}`, response2);
-      fetchSick(param);
+      fetchSick(param, applyData);
       console.log('api calling');
     }
   } catch (error) {
