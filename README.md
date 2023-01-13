@@ -4,7 +4,7 @@
 
 </br></br>
 
-## 기능 상세 : 
+## 기능 상세 : https://github.com/wanted-onboarding8-6/pre-onboarding-8th-3week-6/wiki
 
 1. [Local Start](#local-start)
 2. [구현사항](#구현사항)
